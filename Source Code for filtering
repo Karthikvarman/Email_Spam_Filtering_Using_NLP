@@ -1,0 +1,88 @@
+import os
+import re
+import pandas as pd  # Import pandas for table display
+
+# List of spam-related keywords
+spam_keywords = [
+    "free", "win", "money", "credit", "prize", "click here", 
+    "limited offer", "act now", "urgent", "guarantee", "won",
+]
+
+# Function to preprocess email text
+def preprocess_email(email_content):
+    # Convert to lowercase and remove non-alphabetical characters
+    email_content = email_content.lower()
+    email_content = re.sub(r'[^a-z\s]', ' ', email_content)  # Replace with space
+    return email_content
+
+# Function to classify email as spam or not
+def is_spam(email_content, spam_keywords, threshold=1):  # Set threshold to 1 for testing
+    # Preprocess the email content
+    email_content = preprocess_email(email_content)
+    
+    # Count occurrences of spam keywords
+    spam_count = sum(email_content.count(keyword) for keyword in spam_keywords)
+    
+    # If spam count exceeds threshold, classify as spam
+    return spam_count >= threshold
+
+# Paths
+input_folder = "email_folder"  # Replace with your input folder path
+spam_folder = "spam_emails"  # Folder to store spam emails
+non_spam_folder = "non_spam_emails"  # Folder to store non-spam emails
+
+# Create output folders if they don't exist
+os.makedirs(spam_folder, exist_ok=True)
+os.makedirs(non_spam_folder, exist_ok=True)
+
+# Lists to hold the spam and non-spam emails for displaying in the terminal
+spam_list = []
+non_spam_list = []
+
+# Loop through each text file in the input folder
+for filename in os.listdir(input_folder):
+    if filename.endswith(".txt"):
+        file_path = os.path.join(input_folder, filename)
+        
+        # Read the text file
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                email_content = file.read()  # Read the entire content
+            
+            # Check if the email is spam
+            if is_spam(email_content, spam_keywords):
+                # Save to spam folder
+                with open(os.path.join(spam_folder, f"{filename}"), 'w', encoding='utf-8') as spam_file:
+                    spam_file.write(email_content)
+                
+                # Append to spam list for display
+                spam_list.append({'File': filename, 'Content': email_content.strip()[:100] + '...'})  # Show only first 100 characters
+            else:
+                # Save to non-spam folder
+                with open(os.path.join(non_spam_folder, f"{filename}"), 'w', encoding='utf-8') as non_spam_file:
+                    non_spam_file.write(email_content)
+
+                # Append to non-spam list for display
+                non_spam_list.append({'File': filename, 'Content': email_content.strip()[:100] + '...'})  # Show only first 100 characters
+
+            print(f"Processed file: {filename} - Classified as {'SPAM' if is_spam(email_content, spam_keywords) else 'NON-SPAM'}")
+        
+        except Exception as e:
+            print(f"Error processing file {filename}: {e}")
+
+# Display the classified spam and non-spam emails in table format using pandas
+print("\nSpam Emails:")
+if spam_list:
+    spam_df = pd.DataFrame(spam_list)
+    print(spam_df)
+else:
+    print("No spam emails found.")
+
+print("\nNon-Spam Emails:")
+if non_spam_list:
+    non_spam_df = pd.DataFrame(non_spam_list)
+    print(non_spam_df)
+else:
+    print("No non-spam emails found.")
+
+print("Filtering completed!")
