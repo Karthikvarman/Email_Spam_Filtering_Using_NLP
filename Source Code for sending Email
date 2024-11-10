@@ -1,0 +1,40 @@
+import os
+
+def save_to_text(file_path, data):
+    """Save the given data to a text file."""
+    with open(file_path, mode='w', encoding='utf-8') as file: # Open the file at file_path in write mode with UTF-8 encoding
+        for line in data:  # Iterate over each line in the data list
+            file.write(line + '\n')  # Write each line to the file, followed by a newline character
+
+def main():
+    # Prompt user for folder path
+    print("Enter the folder path where you want to save your text file:")  # Display prompt for folder path input
+    folder_path = input().strip()  # Get user input, remove any leading/trailing whitespace
+
+    # Ensure the folder exists
+    if not os.path.exists(folder_path):  # Check if the specified folder exists
+        print("The specified folder does not exist. Please check the path and try again.")  # Display an error message if the folder doesn't exist
+        return  # Exit the function if the folder is not found
+
+    # Prompt user for filename
+    print("Enter the filename (without .txt extension) to save your input:")  # Display prompt for filename input
+    file_name = input().strip() + '.txt'  # Get user input, append '.txt' extension to create the full filename
+
+    # Combine folder path and filename to create full file path
+    file_path = os.path.join(folder_path, file_name)  # Create the full file path by joining folder path and filename
+
+    user_input = []  # Initialize an empty list to store user-entered text lines
+
+    print("Enter your text (type 'exit' to finish):")  # Display instructions for entering text lines
+
+    while True:  # Start a loop to collect text input from the user
+        line = input()  # Read a line of input from the user
+        if line.lower() == 'exit':  # Check if the user typed 'exit' (case insensitive)
+            break  # Exit the loop if 'exit' is entered
+        user_input.append(line)  # Append the line to the user_input list
+
+    save_to_text(file_path, user_input)  # Call the save_to_text function to save user input to the specified file
+    print(f"Data saved to {file_path}")  # Display a confirmation message with the file path where data was saved
+
+if __name__ == "__main__":  # Check if the script is being run directly (not imported as a module)
+    main()  # Call the main function to execute the program
